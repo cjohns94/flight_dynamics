@@ -108,27 +108,14 @@ class mavDynamics:
 
         # euler angles
         phi, theta, psi = Quaternion2Euler(np.array([e0, e1, e2, e3]))
+        R = Quaternion2Rotation(np.array([e0, e1, e2, e3]))
 
-        # trig stuff
-        cphi = np.cos(phi)
-        sphi = np.sin(phi)
-        cth = np.cos(theta)
-        sth = np.sin(theta)
-        cpsi = np.cos(psi)
-        spsi = np.sin(psi)
+        # position kinematics using quaternion to avoid singularity
+        pdot = R @ np.array([[u], [v], [w]])
 
-        # position kinematics, eq 3.1 in book
-        pn_dot = (
-            (cth * cpsi) * u
-            + (sphi * sth * cpsi - cphi * spsi) * v
-            + (cphi * sth * cpsi + sphi * spsi) * w
-        )
-        pe_dot = (
-            (cth * spsi) * u
-            + (sphi * sth * spsi + cphi * cpsi) * v
-            + (cphi * sth * spsi - sphi * cpsi) * w
-        )
-        pd_dot = (-sth) * u + (sphi * cth) * v + (cphi * cth) * w
+        pn_dot = pdot[0][0]
+        pe_dot = pdot[1][0]
+        pd_dot = pdot[2][0]
 
         # position dynamics
         u_dot = (r * v - q * w) + fx / MAV.mass
@@ -138,11 +125,10 @@ class mavDynamics:
         # rotational kinematics
         e0_dot = 0.5 * (-p * e1 - q * e2 - r * e3)
         e1_dot = 0.5 * (p * e0 + r * e2 - q * e3)
-        e2_dot = 0.5 * (q * e0 - r * e1 + p * e2)
+        e2_dot = 0.5 * (q * e0 - r * e1 + p * e3)
         e3_dot = 0.5 * (r * e0 + q * e1 - p * e2)
 
         # gammas
-        gamma = MAV.gamma
         gamma1 = MAV.gamma1
         gamma2 = MAV.gamma2
         gamma3 = MAV.gamma3
@@ -154,7 +140,7 @@ class mavDynamics:
 
         # rotatonal dynamics
         p_dot = gamma1 * p * q - gamma2 * q * r + gamma3 * l + gamma4 * n
-        q_dot = gamma5 * p * r - gamma6 * (p ** 2 - r ** 2) + MAV.mass / MAV.Jy
+        q_dot = gamma5 * p * r - gamma6 * (p ** 2 - r ** 2) + m / MAV.Jy
         r_dot = gamma7 * p * q - gamma1 * q * r + gamma4 * l + gamma8 * n
 
         # collect the derivative of the states
@@ -191,3 +177,5 @@ class mavDynamics:
         self.true_state.p = self._state.item(10)
         self.true_state.q = self._state.item(11)
         self.true_state.r = self._state.item(12)
+
+        # print()
