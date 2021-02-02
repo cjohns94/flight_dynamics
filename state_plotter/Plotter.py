@@ -211,9 +211,7 @@ class Plotter:
                 self.new_data = False
                 self.prev_time = self.time
         # update the plots
-        print("getting stuck here in Plotter...")
         self.app.processEvents()
-        print("unstuck")
 
 
     #

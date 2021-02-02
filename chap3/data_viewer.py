@@ -127,9 +127,7 @@ class dataViewer:
         self.plotter.add_vector_measurement('commands', commands, self.time)
 
         # Update and display the plot
-        print('getting stuck here in data_viewer...')
         self.plotter.update_plots()
-        print('im unstuck')
 
         # increment time
         self.time += ts
