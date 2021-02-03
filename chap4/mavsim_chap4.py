@@ -4,31 +4,32 @@ mavsimPy
     - Update history:  
         12/27/2018 - RWB
         1/17/2019 - RWB
-        2/24/2020 - RWB
 """
 import sys
 sys.path.append('..')
 import numpy as np
 import parameters.simulation_parameters as SIM
 
-from chap2.mav_viewer import mavViewer
-from chap3.data_viewer import dataViewer
-from chap4.mav_dynamics import mavDynamics
-from chap4.wind_simulation import windSimulation
+from chap2.mav_viewer import MavViewer
+from chap3.data_viewer import DataViewer
+from chap4.mav_dynamics import MavDynamics
+from chap4.wind_simulation import WindSimulation
+from message_types.msg_delta import MsgDelta
 
 # initialize the visualization
 VIDEO = False  # True==write video, False==don't write video
-mav_view = mavViewer()  # initialize the mav viewer
-data_view = dataViewer()  # initialize view of data plots
+mav_view = MavViewer()  # initialize the mav viewer
+data_view = DataViewer()  # initialize view of data plots
 if VIDEO is True:
-    from chap2.video_writer import videoWriter
-    video = videoWriter(video_name="chap4_video.avi",
+    from chap2.video_writer import VideoWriter
+    video = VideoWriter(video_name="chap4_video.avi",
                         bounding_box=(0, 0, 1000, 1000),
                         output_rate=SIM.ts_video)
 
 # initialize elements of the architecture
-wind = windSimulation(SIM.ts_simulation)
-mav = mavDynamics(SIM.ts_simulation)
+wind = WindSimulation(SIM.ts_simulation)
+mav = MavDynamics(SIM.ts_simulation)
+delta = MsgDelta()
 
 # initialize the simulation time
 sim_time = SIM.start_time
@@ -38,11 +39,10 @@ plot_time = sim_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     # -------set control surfaces-------------
-    delta_e = -0.2
-    delta_a = 0.0
-    delta_r = 0.005
-    delta_t = 0.5
-    delta = np.array([[delta_e, delta_a, delta_r, delta_t]]).T
+    delta.elevator = -0.2
+    delta.aileron = 0.0
+    delta.rudder = 0.005
+    delta.throttle = 0.5
     # transpose to make it a column vector
 
     # -------physical system-------------
@@ -56,6 +56,7 @@ while sim_time < SIM.end_time:
     data_view.update(mav.true_state,  # true states
                      mav.true_state,  # estimated states
                      mav.true_state,  # commanded states
+                     delta,  # inputs to aircraft
                      SIM.ts_simulation)
     if VIDEO is True:
         video.update(sim_time)

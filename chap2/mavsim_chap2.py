@@ -2,12 +2,17 @@
 mavSimPy 
     - Chapter 2 assignment for Beard & McLain, PUP, 2012
     - Update history:  
-        2/24/2020 - RWB
+        1/10/2019 - RWB
 """
 import sys
 sys.path.append('..')
-from chap2.mav_viewer import mavViewer
+
+# import viewers and video writer
+from chap2.mav_viewer import MavViewer
+
+# import parameters
 import parameters.simulation_parameters as SIM
+# import message types
 from message_types.msg_state import MsgState
 
 # initialize messages
@@ -15,10 +20,10 @@ state = MsgState()  # instantiate state message
 
 # initialize viewers and video
 VIDEO = False  # True==write video, False==don't write video
-mav_view = mavViewer()
+mav_view = MavViewer()
 if VIDEO is True:
-    from chap2.video_writer import videoWriter
-    video = videoWriter(video_name="chap2_video.avi",
+    from chap2.video_writer import VideoWriter
+    video = VideoWriter(video_name="chap2_video.avi",
                         bounding_box=(0, 0, 1000, 1000),
                         output_rate=SIM.ts_video)
 
@@ -29,11 +34,11 @@ sim_time = SIM.start_time
 while sim_time < SIM.end_time:
     # -------vary states to check viewer-------------
     if sim_time < SIM.end_time/6:
-        state.pn += 10*SIM.ts_simulation
+        state.north += 10*SIM.ts_simulation
     elif sim_time < 2*SIM.end_time/6:
-        state.pe += 10*SIM.ts_simulation
+        state.east += 10*SIM.ts_simulation
     elif sim_time < 3*SIM.end_time/6:
-        state.h += 10*SIM.ts_simulation
+        state.altitude += 10*SIM.ts_simulation
     elif sim_time < 4*SIM.end_time/6:
         state.psi += 0.1*SIM.ts_simulation
     elif sim_time < 5*SIM.end_time/6:

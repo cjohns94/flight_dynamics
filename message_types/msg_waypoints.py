@@ -6,17 +6,18 @@ part of mavsim_python
     - Beard & McLain, PUP, 2012
     - Last update:
         3/26/2019 - RWB
+        3/31/2020 - RWB
 """
 import numpy as np
 
-class msgWaypoints:
+
+class MsgWaypoints:
     def __init__(self):
         # the first two flags are used for interacting with the path planner
         #
         # flag to indicate waypoints recently changed (set by planner)
         self.flag_waypoints_changed = True
-        # flag to indicate that the waypoint manager needs new waypoints (set by manager)
-        self.flag_manager_requests_waypoints = True
+        self.plot_updated = False  # used to plot waypoints
 
         # type of waypoint following:
         #   - straight line following
@@ -41,7 +42,8 @@ class msgWaypoints:
         # can this node connect to the goal?
         self.connect_to_goal = np.array([])
 
-    def add(self, ned, airspeed, course, cost, parent, connect_to_goal):
+    def add(self, ned=np.array([[0, 0, 0]]).T, airspeed=0,
+            course=np.inf, cost=0, parent=0, connect_to_goal=0):
         self.num_waypoints = self.num_waypoints + 1
         self.ned = np.append(self.ned, ned, axis=1)
         self.airspeed = np.append(self.airspeed, airspeed)

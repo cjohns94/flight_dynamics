@@ -9,7 +9,8 @@ part of mavsim_python
 """
 import numpy as np
 
-class msgDelta:
+
+class MsgDelta:
     def __init__(self,
                  elevator=0.0,
                  aileron=0.0,

@@ -8,14 +8,32 @@ sys.path.append('..')
 from tools.transfer_function import transferFunction
 import numpy as np
 
-class windSimulation:
+
+class WindSimulation:
     def __init__(self, Ts):
         # steady state wind defined in the inertial frame
         self._steady_state = np.array([[0., 0., 0.]]).T
+        #self._steady_state = np.array([[0., 5., 0.]]).T
 
-        self.u_w =
-        self.v_w =
-        self.w_w =
+        #   Dryden gust model parameters (section 4.4 UAV book)
+        Va =  # must set Va to a constant value
+        Lu = 
+        Lv = 
+        Lw = 
+        gust_flag = True
+        if gust_flag==True:
+            sigma_u = 
+            sigma_v = 
+            sigma_w = 
+        else:
+            sigma_u = 
+            sigma_v = 
+            sigma_w = 
+
+        # Dryden transfer functions (section 4.4 UAV book)
+        self.u_w = #transferFunction()
+        self.v_w = #transferFunction()
+        self.w_w = #transferFunction()
         self._Ts = Ts
 
     def update(self):

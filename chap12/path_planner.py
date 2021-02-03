@@ -7,73 +7,72 @@
 import numpy as np
 import sys
 sys.path.append('..')
-from message_types.msg_waypoints import msg_waypoints
+from message_types.msg_waypoints import MsgWaypoints
+from chap12.rrt_straight_line import RRTStraightLine
+from chap12.rrt_dubins import RRTDubins
 
-class path_planner:
+
+class PathPlanner:
     def __init__(self):
         # waypoints definition
-        self.waypoints = msg_waypoints()
+        self.waypoints = MsgWaypoints()
+        self.rrt_straight_line = RRTStraightLine()
+        self.rrt_dubins = RRTDubins()
 
-    def update(self, map, state):
+    def update(self, world_map, state, radius):
+        print('planning...')
         # this flag is set for one time step to signal a redraw in the viewer
-        # planner_flag = 1  # return simple waypoint path
-        planner_flag = 2  # return dubins waypoint path
-        # planner_flag = 3  # plan path through city using straight-line RRT
-        # planner_flag = 4  # plan path through city using dubins RRT
-        if planner_flag == 1:
-            self.waypoints.type = 'fillet'
-            self.waypoints.num_waypoints = 4
+        # planner_flag = 'simple_straight'  # return simple waypoint path
+        # planner_flag = 'simple_dubins'  # return simple dubins waypoint path
+        planner_flag = 'rrt_straight'  # plan path through city using straight-line RRT
+        #planner_flag = 'rrt_dubins'  # plan path through city using dubins RRT
+        if planner_flag == 'simple_straight':
             Va = 25
-            self.waypoints.ned[:, 0:self.waypoints.num_waypoints] \
-                = np.array([[0, 0, -100],
-                            [1000, 0, -100],
-                            [0, 1000, -100],
-                            [1000, 1000, -100]]).T
-            self.waypoints.airspeed[:, 0:self.waypoints.num_waypoints] \
-                = np.array([[Va, Va, Va, Va]])
-        elif planner_flag == 2:
+            self.waypoints.type = 'fillet'
+            self.waypoints.add(np.array([[0, 0, -100]]).T, Va, np.inf, np.inf, 0, 0)
+            self.waypoints.add(np.array([[1000, 0, -100]]).T, Va, np.inf, np.inf, 0, 0)
+            self.waypoints.add(np.array([[0, 1000, -100]]).T, Va, np.inf, np.inf, 0, 0)
+            self.waypoints.add(np.array([[1000, 1000, -100]]).T, Va, np.inf, np.inf, 0, 0)
+
+        elif planner_flag == 'simple_dubins':
+            Va = 25
             self.waypoints.type = 'dubins'
-            self.waypoints.num_waypoints = 4
-            Va = 25
-            self.waypoints.ned[:, 0:self.waypoints.num_waypoints] \
-                = np.array([[0, 0, -100],
-                            [1000, 0, -100],
-                            [0, 1000, -100],
-                            [1000, 1000, -100]]).T
-            self.waypoints.airspeed[:, 0:self.waypoints.num_waypoints] \
-                = np.array([[Va, Va, Va, Va]])
-            self.waypoints.course[:, 0:self.waypoints.num_waypoints] \
-                = np.array([[np.radians(0),
-                             np.radians(45),
-                             np.radians(45),
-                             np.radians(-135)]])
-        elif planner_flag == 3:
-            self.waypoints.type = 'fillet'
-            self.waypoints.num_waypoints = 0
-            Va = 25
-            # current configuration vector format: N, E, D, Va
-            wpp_start = np.array([state.n,
-                                  state.e,
-                                  -state.h,
-                                  state.Va])
-            if np.linalg.norm(np.array([state.n, state.e, -state.h])-np.array([map.city_width, map.city_width, -state.h])) == 0:
-                wpp_end = np.array([0,
-                                    0,
-                                    -state.h,
-                                    Va])
-            else:
-                wpp_end = np.array([map.city_width,
-                                    map.city_width,
-                                    -state.h,
-                                    Va])
+            self.waypoints.add(np.array([[0, 0, -100]]).T, Va, np.radians(0), np.inf, 0, 0)
+            self.waypoints.add(np.array([[1000, 0, -100]]).T, Va, np.radians(45), np.inf, 0, 0)
+            self.waypoints.add(np.array([[0, 1000, -100]]).T, Va, np.radians(45), np.inf, 0, 0)
+            self.waypoints.add(np.array([[1000, 1000, -100]]).T, Va, np.radians(-135), np.inf, 0, 0)
 
-            waypoints = self.rrt.planPath(wpp_start, wpp_end, map)
-            self.waypoints.ned = waypoints.ned
-            self.waypoints.airspeed = waypoints.airspeed
-            self.waypoints.num_waypoints = waypoints.num_waypoints
-        # elif planner_flag == 4:
+        elif planner_flag == 'rrt_straight':
+            desired_airspeed = 25
+            desired_altitude = 100
+            # start pose is current pose
+            start_pose = np.array([[state.north], [state.east], [-desired_altitude]])
+            # desired end pose
+            if np.linalg.norm(start_pose[0:2]) < world_map.city_width / 2:
+                end_pose = np.array([[world_map.city_width], [world_map.city_width],
+                                     [-desired_altitude]])
+            else:  # or to the bottom-left corner of world_map
+                end_pose = np.array([[0], [0], [-desired_altitude]])
+            self.waypoints = self.rrt_straight_line.update(start_pose, end_pose,
+                                                           desired_airspeed, world_map, radius)
 
+        elif planner_flag == 'rrt_dubins':
+            desired_airspeed = 25
+            desired_altitude = 100
+            # start pose is current pose
+            start_pose = np.array([[state.north], [state.east],
+                                   [-desired_altitude], [state.chi]])
+            # desired end pose
+            # either plan to the top-right corner of world_map
+            if np.linalg.norm(start_pose[0:2]) < world_map.city_width / 2:
+                end_pose = np.array([[world_map.city_width], [world_map.city_width],
+                                     [-desired_altitude], [state.chi]])
+            else:  # or to the bottom-left corner of world_map
+                end_pose = np.array([[0], [0], [-desired_altitude], [state.chi]])
+            self.waypoints = self.rrt_dubins.update(start_pose, end_pose,
+                                                    desired_airspeed, world_map, radius)
         else:
             print("Error in Path Planner: Undefined planner type.")
-
+        self.waypoints.plot_updated = False
+        print('...done planning.')
         return self.waypoints

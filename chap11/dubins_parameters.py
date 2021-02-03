@@ -5,51 +5,140 @@
 #     - Beard & McLain, PUP, 2012
 #     - Update history:  
 #         3/26/2019 - RWB
+#         4/2/2020 - RWB
 
 import numpy as np
 import sys
 sys.path.append('..')
 
 
-class dubins_parameters:
-    def __init__(self):
-        self.p_s = np.inf*np.ones((3,1))  # the start position in re^3
-        self.chi_s = np.inf  # the start course angle
-        self.p_e = np.inf*np.ones((3,1))  # the end position in re^3
-        self.chi_e = np.inf  # the end course angle
-        self.radius = np.inf  # turn radius
-        self.length = np.inf  # length of the Dubins path
-        self.center_s = np.inf*np.ones((3,1))  # center of the start circle
-        self.dir_s = np.inf  # direction of the start circle
-        self.center_e = np.inf*np.ones((3,1))  # center of the end circle
-        self.dir_e = np.inf  # direction of the end circle
-        self.r1 = np.inf*np.ones((3,1))  # vector in re^3 defining half plane H1
-        self.r2 = np.inf*np.ones((3,1))  # vector in re^3 defining position of half plane H2
-        self.r3 = np.inf*np.ones((3,1))  # vector in re^3 defining position of half plane H3
-        self.n1 = np.inf*np.ones((3,1))  # unit vector in re^3 along straight line path
-        self.n3 = np.inf*np.ones((3,1))  # unit vector defining direction of half plane H3
+class DubinsParameters:
+    def __init__(self, ps=9999*np.ones((3,1)), chis=9999,
+                 pe=9999*np.ones((3,1)), chie=9999, R=9999):
+        if R == 9999:
+            L = R
+            cs = ps
+            lams = R
+            ce = ps
+            lame = R
+            w1 = ps
+            q1 = ps
+            w2 = ps
+            w3 = ps
+            q3 = ps
+        else:
+            L, cs, lams, ce, lame, w1, q1, w2, w3, q3 \
+                = compute_parameters(ps, chis, pe, chie, R)
+        self.p_s = ps
+        self.chi_s = chis
+        self.p_e = pe
+        self.chi_e = chie
+        self.radius = R
+        self.length = L
+        self.center_s = cs
+        self.dir_s = lams
+        self.center_e = ce
+        self.dir_e = lame
+        self.r1 = w1
+        self.n1 = q1
+        self.r2 = w2
+        self.r3 = w3
+        self.n3 = q3
 
     def update(self, ps, chis, pe, chie, R):
-        ell = np.linalg.norm(ps - pe)
-        if ell < 2 * R:
-            print('Error in Dubins Parameters: The distance between nodes must be larger than 2R.')
-        else:
+         L, cs, lams, ce, lame, w1, q1, w2, w3, q3 \
+            = compute_parameters(ps, chis, pe, chie, R)
+         self.p_s = ps
+         self.chi_s = chis
+         self.p_e = pe
+         self.chi_e = chie
+         self.radius = R
+         self.length = L
+         self.center_s = cs
+         self.dir_s = lams
+         self.center_e = ce
+         self.dir_e = lame
+         self.r1 = w1
+         self.n1 = q1
+         self.r2 = w2
+         self.r3 = w3
+         self.n3 = q3
 
-            self.p_s =
-            self.chi_s =
-            self.p_e =
-            self.chi_e =
-            self.radius =
-            self.length =
-            self.center_s =
-            self.dir_s =
-            self.center_e =
-            self.dir_e =
-            self.r1 =
-            self.n1 =
-            self.r2 =
-            self.r3 =
-            self.n3 =
+
+def compute_parameters(ps, chis, pe, chie, R):
+    ell = 
+    if ell < 2 * R:
+        print('Error in Dubins Parameters: The distance between nodes must be larger than 2R.')
+    else:
+        # compute start and end circles
+        crs = 
+        cls = 
+        cre = 
+        cle = 
+
+        # compute L1
+        
+        L1 = 
+        # compute L2
+
+        ell = 
+        theta = 
+        theta2 = 
+        if not np.isreal(theta2):
+            L2 = 
+        else:
+            L2 = 
+
+        # compute L3
+        ell = 
+        theta = 
+        theta2 = 
+        if not np.isreal(theta2):
+
+        else:
+            L3 = 
+        # compute L4
+        theta = 
+        L4 = 
+        # L is the minimum distance
+        L = np.min([L1, L2, L3, L4])
+        idx = np.argmin([L1, L2, L3, L4])
+        if idx == 0:
+            cs = 
+            lams = 
+            ce = 
+            lame = 
+            q1 = 
+            w1 = 
+            w2 = 
+        elif idx == 1:
+            cs = 
+            lams = 
+            ce = 
+            lame = 
+            q1 = 
+            w1 = 
+            w2 =  
+        elif idx == 2:
+            cs = 
+            lams = 
+            ce = 
+            lame = 
+            q1 = 
+            w1 = 
+            w2 = 
+        elif idx == 3:
+            cs = 
+            lams = 
+            ce = 
+            lame = 
+            q1 = 
+            w1 = 
+            w2 =  
+        w3 = 
+        q3 = 
+
+        return L, cs, lams, ce, lame, w1, q1, w2, w3, q3
 
 
 def rotz(theta):
@@ -59,7 +148,6 @@ def rotz(theta):
 
 
 def mod(x):
-    # make x between 0 and 2*pi
     while x < 0:
         x += 2*np.pi
     while x > 2*np.pi:

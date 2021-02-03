@@ -1,13 +1,14 @@
 """
-autopilot block for mavsim_python
+autopilot block for mavsim_python - Total Energy Control System
     - Beard & McLain, PUP, 2012
     - Last Update:
-        2/6/2019 - RWB
+        2/14/2020 - RWB
 """
 import sys
 import numpy as np
 sys.path.append('..')
 import parameters.control_parameters as AP
+import parameters.aerosonde_parameters as MAV
 from tools.transfer_function import transferFunction
 from tools.wrap import wrap
 from chap6.pi_control import PIControl
@@ -33,21 +34,27 @@ class Autopilot:
                         den=np.array([[1, AP.yaw_damper_p_wo]]),
                         Ts=ts_control)
 
-        # instantiate lateral controllers
+        # instantiate TECS controllers
         self.pitch_from_elevator = PDControlWithRate(
                         kp=AP.pitch_kp,
                         kd=AP.pitch_kd,
                         limit=np.radians(45))
-        self.altitude_from_pitch = PIControl(
-                        kp=AP.altitude_kp,
-                        ki=AP.altitude_ki,
-                        Ts=ts_control,
-                        limit=np.radians(30))
-        self.airspeed_from_throttle = PIControl(
-                        kp=AP.airspeed_throttle_kp,
-                        ki=AP.airspeed_throttle_ki,
-                        Ts=ts_control,
-                        limit=1.0)
+        # throttle gains (unitless)
+        self.E_kp = 
+        self.E_ki = 
+        # pitch gains
+        self.L_kp = 
+        self.L_ki = 
+        # saturated altitude error
+        self.h_error_max =   # meters
+        self.E_integrator = 
+        self.L_integrator = 
+        self.E_error_d1 = 
+        self.L_error_d1 = 
+        self.delta_t_d1 = 
+        self.theta_c_d1 = 
+        self.theta_c_max = 
+        self.Ts = ts_control
         self.commanded_state = MsgState()
 
     def update(self, cmd, state):
@@ -58,24 +65,43 @@ class Autopilot:
         delta_a = 
         delta_r = 
 
-        # longitudinal autopilot
-        # saturate the altitude command
-        altitude_c = 
+        # longitudinal TECS autopilot
+        # error in kinetic energy
+        K_error = 
+        K_ref = 
+
+        # (saturated) error in potential energy
+        U_error = 
+
+        # (normalized) error in total energy and energy difference
+        E_error =
+        L_error = 
+
+        #  update the integrator(with anti - windup)
+        if ():
+            self.E_integrator = 
+
+        if ():
+            self.L_integrator = 
+
+        delta_t = 
         theta_c = 
         delta_e = 
-        delta_t = 
-        delta_t =
+        self.E_error_d1 = E_error
+        self.L_error_d1 = L_error
+        self.delta_t_d1 = delta_t
+        self.theta_c_d1 = theta_c
 
         # construct output and commanded states
         delta = MsgDelta(elevator=delta_e,
                          aileron=delta_a,
                          rudder=delta_r,
                          throttle=delta_t)
-        self.commanded_state.altitude = cmd.altitude_command
-        self.commanded_state.Va = cmd.airspeed_command
-        self.commanded_state.phi = phi_c
-        self.commanded_state.theta = theta_c
-        self.commanded_state.chi = cmd.course_command
+        self.commanded_state.h = 
+        self.commanded_state.Va = 
+        self.commanded_state.phi = 
+        self.commanded_state.theta = 
+        self.commanded_state.chi = 
         return delta, self.commanded_state
 
     def saturate(self, input, low_limit, up_limit):

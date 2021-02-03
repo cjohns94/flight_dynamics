@@ -22,7 +22,7 @@ import parameters.aerosonde_parameters as MAV
 from tools.rotations import Quaternion2Euler, Quaternion2Rotation
 
 
-class mavDynamics:
+class MavDynamics:
     def __init__(self, Ts):
         self.ts_simulation = Ts
         # set initial states based on parameter file
@@ -30,9 +30,9 @@ class mavDynamics:
         # _state = [pn, pe, pd, u, v, w, e0, e1, e2, e3, p, q, r]
         self._state = np.array(
             [
-                [MAV.pn0],  # (0)
-                [MAV.pe0],  # (1)
-                [MAV.pd0],  # (2)
+                [MAV.north0],  # (0)
+                [MAV.east0],  # (1)
+                [MAV.down0],  # (2)
                 [MAV.u0],  # (3)
                 [MAV.v0],  # (4)
                 [MAV.w0],  # (5)
@@ -168,9 +168,9 @@ class mavDynamics:
     def _update_true_state(self):
         # update the true state message:
         phi, theta, psi = Quaternion2Euler(self._state[6:10])
-        self.true_state.pn = self._state.item(0)
-        self.true_state.pe = self._state.item(1)
-        self.true_state.h = -self._state.item(2)
+        self.true_state.north = self._state.item(0)
+        self.true_state.east = self._state.item(1)
+        self.true_state.altitude = -self._state.item(2)
         self.true_state.phi = phi
         self.true_state.theta = theta
         self.true_state.psi = psi

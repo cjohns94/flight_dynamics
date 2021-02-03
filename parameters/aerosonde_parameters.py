@@ -7,14 +7,14 @@ from tools.rotations import Euler2Quaternion
                 #   Initial Conditions
 ######################################################################################
 #   Initial conditions for MAV
-pn0 = 0.  # initial north position
-pe0 = 0.  # initial east position
-pd0 = -100.0  # initial down position
+north0 = 0.  # initial north position
+east0 = 0.  # initial east position
+down0 = -100.0  # initial down position
 u0 = 25.  # initial velocity along body x-axis
 v0 = 0.  # initial velocity along body y-axis
 w0 = 0.  # initial velocity along body z-axis
 phi0 = 0.  # initial roll angle
-theta0 =  0.  # initial pitch angle
+theta0 = 0.  # initial pitch angle
 psi0 = 0.0  # initial yaw angle
 p0 = 0  # initial roll rate
 q0 = 0  # initial pitch rate
@@ -92,7 +92,7 @@ C_n_delta_r = -0.069
                 #   Propeller thrust / torque parameters (see addendum by McLain)
 ######################################################################################
 # Prop parameters
-D_prop = 20 * (0.0254)     # prop diameter in m
+D_prop = 20*(0.0254)     # prop diameter in m
 
 # Motor parameters
 KV = 145.                   # from datasheet RPM/V
@@ -105,7 +105,7 @@ i0 = 1.5                     # no-load (zero-torque) current (A)
 ncells = 12.
 V_max = 3.7 * ncells  # max voltage for specified number of battery cells
 
-# Coefficients from prop_data fit
+# Coeffiecients from prop_data fit
 C_Q2 = -0.01664
 C_Q1 = 0.004970
 C_Q0 = 0.005230
@@ -128,15 +128,15 @@ gamma7 = ((Jx - Jy) * Jx + (Jxz**2)) / gamma
 gamma8 = Jx / gamma
 
 #   C values defines on pag 62
-C_p_0 = gamma3 * C_ell_0 + gamma4 * C_n_0
-C_p_beta = gamma3 * C_ell_beta + gamma4 * C_n_beta
-C_p_p = gamma3 * C_ell_p + gamma4 * C_n_p
-C_p_r = gamma3 * C_ell_r + gamma4 * C_n_r
-C_p_delta_a = gamma3 * C_ell_delta_a + gamma4 * C_n_delta_a
-C_p_delta_r = gamma3 * C_ell_delta_r + gamma4 * C_n_delta_r
-C_r_0 = gamma4 * C_ell_0 + gamma8 * C_n_0
-C_r_beta = gamma4 * C_ell_beta + gamma8 * C_n_beta
-C_r_p = gamma4 * C_ell_p + gamma8 * C_n_p
-C_r_r = gamma4 * C_ell_r + gamma8 * C_n_r
-C_r_delta_a = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
-C_r_delta_r = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r
+C_p_0         = gamma3 * C_ell_0      + gamma4 * C_n_0
+C_p_beta      = gamma3 * C_ell_beta   + gamma4 * C_n_beta
+C_p_p         = gamma3 * C_ell_p      + gamma4 * C_n_p
+C_p_r         = gamma3 * C_ell_r      + gamma4 * C_n_r
+C_p_delta_a    = gamma3 * C_ell_delta_a + gamma4 * C_n_delta_a
+C_p_delta_r    = gamma3 * C_ell_delta_r + gamma4 * C_n_delta_r
+C_r_0         = gamma4 * C_ell_0      + gamma8 * C_n_0
+C_r_beta      = gamma4 * C_ell_beta   + gamma8 * C_n_beta
+C_r_p         = gamma4 * C_ell_p      + gamma8 * C_n_p
+C_r_r         = gamma4 * C_ell_r      + gamma8 * C_n_r
+C_r_delta_a    = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
+C_r_delta_r    = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r

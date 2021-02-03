@@ -3,37 +3,33 @@ compute_trim
     - Chapter 5 assignment for Beard & McLain, PUP, 2012
     - Update history:  
         12/29/2018 - RWB
-        2/24/2020 - RWB
 """
 import sys
 sys.path.append('..')
 import numpy as np
 from scipy.optimize import minimize
 from tools.rotations import Euler2Quaternion
+from message_types.msg_delta import MsgDelta
 
 def compute_trim(mav, Va, gamma):
     # define initial state and input
     e0 = Euler2Quaternion(0., gamma, 0.)
     state0 = np.array([[],  # pn
-                       [],  # pe
-                       [],  # pd
-                       [],  # u
-                       [],  # v
-                       [],  # w
-                       [],  # e0
-                       [],  # e1
-                       [],  # e2
-                       [],  # e3
-                       [],  # p
-                       [],  # q
-                       []   # r
+                   [],  # pe
+                   [],  # pd
+                   [],  # u
+                   [],  # v
+                   [],  # w
+                   [],  # e0
+                   [],  # e1
+                   [],  # e2
+                   [],  # e3
+                   [],  # p
+                   [],  # q
+                   []   # r
                    ])
-    delta0 = np.array([[],  # delta_e
-                       [],  # delta_a
-                       [],  # delta_r
-                       []  # delta_t
-                       ])
-    x0 = np.concatenate((state0, delta0), axis=0)
+    delta0 = #MsgDelta()
+    x0 = np.concatenate((state0, delta0.to_array()), axis=0)
     # define equality constraints
     cons = ({'type': 'eq',
              'fun': lambda x: np.array([
@@ -63,12 +59,16 @@ def compute_trim(mav, Va, gamma):
                    constraints=cons, options={'ftol': 1e-10, 'disp': True})
     # extract trim state and input and return
     trim_state = np.array([res.x[0:13]]).T
-    trim_input = np.array([res.x[13:17]]).T
+    trim_input = MsgDelta(elevator=res.x.item(13),
+                          aileron=res.x.item(14),
+                          rudder=res.x.item(15),
+                          throttle=res.x.item(16))
+    trim_input.print()
     print('trim_state=', trim_state.T)
-    print('trim_input=', trim_input.T)
     return trim_state, trim_input
 
-# objective function to be minimized
-def trim_objective_fun(x, mav, Va, gamma):
-    return J
 
+def trim_objective_fun(x, mav, Va, gamma):
+    # objective function to be minimized
+    J = 
+    return J

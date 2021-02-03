@@ -1,1 +1,3 @@
-# flight_dynamics
+# mavsimPy
+
+Python simulator for uavbook

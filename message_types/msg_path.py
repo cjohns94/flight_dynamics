@@ -9,7 +9,8 @@ part of mavsim_python
 """
 import numpy as np
 
-class msgPath:
+
+class MsgPath:
     def __init__(self):
         # type='line' means straight line following, type='orbit' means orbit following
         self.type = 'line'
@@ -26,5 +27,5 @@ class msgPath:
         self.orbit_radius = 50
         # orbit direction: 'CW'==clockwise, 'CCW'==counter clockwise
         self.orbit_direction = 'CW'
-        # flag that indicates that a path has changed.  Used to signal a redraw in viewer
-        self.flag_path_changed = True
+        # flag that indicates that path has been plotted
+        self.plot_updated = False

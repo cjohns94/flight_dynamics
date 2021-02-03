@@ -3,6 +3,7 @@ mavsim_python
     - Chapter 12 assignment for Beard & McLain, PUP, 2012
     - Last Update:
         4/3/2019 - BGM
+        2/27/2020 - RWB
 """
 import sys
 sys.path.append('..')
@@ -10,78 +11,87 @@ import numpy as np
 import parameters.simulation_parameters as SIM
 import parameters.planner_parameters as PLAN
 
-from chap3.data_viewer import data_viewer
-from chap4.wind_simulation import wind_simulation
-from chap6.autopilot import autopilot
-from chap7.mav_dynamics import mav_dynamics
-from chap8.observer import observer
-from chap10.path_follower import path_follower
-from chap11.path_manager import path_manager
-from chap12.world_viewer import world_viewer
-from chap12.path_planner import path_planner
+from chap7.mav_dynamics import MavDynamics
+from chap4.wind_simulation import WindSimulation
+from chap6.autopilot import Autopilot
+from chap8.observer import Observer
+from chap10.path_follower import PathFollower
+from chap11.path_manager import PathManager
+from chap12.path_planner import PathPlanner
+
+from chap3.data_viewer import DataViewer
+from chap12.world_viewer import WorldViewer
+
 
 # initialize the visualization
 VIDEO = False  # True==write video, False==don't write video
-world_view = world_viewer()  # initialize the viewer
-data_view = data_viewer()  # initialize view of data plots
-if VIDEO == True:
-    from chap2.video_writer import video_writer
-    video = video_writer(video_name="chap12_video.avi",
-                         bounding_box=(0, 0, 1000, 1000),
-                         output_rate=SIM.ts_video)
+world_view = WorldViewer()  # initialize the viewer
+data_view = DataViewer()  # initialize view of data plots
+if VIDEO is True:
+    from chap2.video_writer import VideoWriter
+    video = VideoWriter(video_name="chap12_video.avi",
+                        bounding_box=(0, 0, 1000, 1000),
+                        output_rate=SIM.ts_video)
 
 # initialize elements of the architecture
-wind = wind_simulation(SIM.ts_simulation)
-mav = mav_dynamics(SIM.ts_simulation)
-ctrl = autopilot(SIM.ts_simulation)
-obsv = observer(SIM.ts_simulation)
-path_follow = path_follower()
-path_manage = path_manager()
-path_plan = path_planner()
+wind = WindSimulation(SIM.ts_simulation)
+mav = MavDynamics(SIM.ts_simulation)
+autopilot = Autopilot(SIM.ts_simulation)
+observer = Observer(SIM.ts_simulation)
+path_follower = PathFollower()
+path_manager = PathManager()
+path_planner = PathPlanner()
 
-from message_types.msg_map import msg_map
-map = msg_map(PLAN)
+from message_types.msg_world_map import MsgWorldMap
+world_map = MsgWorldMap()
 
 
 # initialize the simulation time
 sim_time = SIM.start_time
+plot_timer = 0
 
 # main simulation loop
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
-    #-------observer-------------
+    # -------observer-------------
     measurements = mav.sensors()  # get sensor measurements
-    estimated_state = obsv.update(measurements)  # estimate states from measurements
+    estimated_state = observer.update(measurements)  # estimate states from measurements
 
     # -------path planner - ----
-    if path_manage.flag_need_new_waypoints == 1:
-        waypoints = path_plan.update(map, estimated_state)
+    if path_manager.manager_requests_waypoints is True:
+        waypoints = path_planner.update(world_map, estimated_state, PLAN.R_min)
 
-    #-------path manager-------------
-    path = path_manage.update(waypoints, PLAN.R_min, estimated_state)
+    # -------path manager-------------
+    path = path_manager.update(waypoints, PLAN.R_min, estimated_state)
 
-    #-------path follower-------------
-    autopilot_commands = path_follow.update(path, estimated_state)
+    # -------path follower-------------
+    autopilot_commands = path_follower.update(path, estimated_state)
 
-    #-------controller-------------
-    delta, commanded_state = ctrl.update(autopilot_commands, estimated_state)
+    # -------autopilot-------------
+    delta, commanded_state = autopilot.update(autopilot_commands, estimated_state)
 
-    #-------physical system-------------
+    # -------physical system-------------
     current_wind = wind.update()  # get the new wind vector
-    mav.update_state(delta, current_wind)  # propagate the MAV dynamics
+    mav.update(delta, current_wind)  # propagate the MAV dynamics
 
-    #-------update viewer-------------
-    world_view.update(map, waypoints, path, mav.true_state)  # plot path and MAV
-    data_view.update(mav.true_state, # true states
-                     estimated_state, # estimated states
-                     commanded_state, # commanded states
-                     SIM.ts_simulation)
-    if VIDEO == True: video.update(sim_time)
+    # -------update viewer-------------
+    if plot_timer > SIM.ts_plotting:
+        world_view.update(mav.true_state, path, waypoints, world_map)  # plot path and MAV
+        data_view.update(mav.true_state,  # true states
+                         estimated_state,  # estimated states
+                         commanded_state,  # commanded states
+                         delta,  # input to aircraft
+                         SIM.ts_plotting)
+        plot_timer = 0
+    plot_timer += SIM.ts_simulation
+    if VIDEO is True:
+        video.update(sim_time)
 
-    #-------increment time-------------
+    # -------increment time-------------
     sim_time += SIM.ts_simulation
 
-if VIDEO == True: video.close()
+if VIDEO is True:
+    video.close()
 
 
 

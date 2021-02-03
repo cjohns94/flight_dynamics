@@ -2,7 +2,7 @@ from state_plotter.Plotter import Plotter
 from state_plotter.plotter_args import *
 
 
-class sensor_viewer:
+class SensorViewer:
     def __init__(self):
         time_window_length=100
         self.plotter = Plotter(plotting_frequency=100,  # refresh plot every 100 time steps
@@ -71,7 +71,7 @@ class sensor_viewer:
         self.plotter.add_plotboxes(plots)
         # Define and label vectors for more convenient/natural data input
         self.plotter.define_input_vector('sensors', ['gyro_x', 'gyro_y', 'gyro_z',
-                                                     'abs_pressure',
+                                                     'absolute_pressure',
                                                      'accel_x', 'accel_y', 'accel_z',
                                                      'diff_pressure',
                                                      'gps_n', 'gps_e', 'gps_h',
