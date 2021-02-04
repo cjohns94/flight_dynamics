@@ -6,12 +6,14 @@ mavsimPy
         1/17/2019 - RWB
 """
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 import numpy as np
 import parameters.simulation_parameters as SIM
 
 from chap2.mav_viewer import MavViewer
-from chap3.data_viewer import DataViewer
+
+# from chap3.data_viewer import DataViewer
 from chap4.mav_dynamics import MavDynamics
 from chap4.wind_simulation import WindSimulation
 from message_types.msg_delta import MsgDelta
@@ -19,12 +21,15 @@ from message_types.msg_delta import MsgDelta
 # initialize the visualization
 VIDEO = False  # True==write video, False==don't write video
 mav_view = MavViewer()  # initialize the mav viewer
-data_view = DataViewer()  # initialize view of data plots
+# data_view = DataViewer()  # initialize view of data plots
 if VIDEO is True:
     from chap2.video_writer import VideoWriter
-    video = VideoWriter(video_name="chap4_video.avi",
-                        bounding_box=(0, 0, 1000, 1000),
-                        output_rate=SIM.ts_video)
+
+    video = VideoWriter(
+        video_name="chap4_video.avi",
+        bounding_box=(0, 0, 1000, 1000),
+        output_rate=SIM.ts_video,
+    )
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
@@ -39,9 +44,9 @@ plot_time = sim_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     # -------set control surfaces-------------
-    delta.elevator = -0.2
+    delta.elevator = -0.0
     delta.aileron = 0.0
-    delta.rudder = 0.005
+    delta.rudder = 0.000
     delta.throttle = 0.5
     # transpose to make it a column vector
 
@@ -50,14 +55,15 @@ while sim_time < SIM.end_time:
     mav.update(delta, current_wind)  # propagate the MAV dynamics
 
     # -------update viewer-------------
-    if sim_time-plot_time > SIM.ts_plotting:
+    if sim_time - plot_time > SIM.ts_plotting:
         mav_view.update(mav.true_state)  # plot body of MAV
         plot_time = sim_time
-    data_view.update(mav.true_state,  # true states
-                     mav.true_state,  # estimated states
-                     mav.true_state,  # commanded states
-                     delta,  # inputs to aircraft
-                     SIM.ts_simulation)
+    # data_view.update(mav.true_state,  # true states
+    #                  mav.true_state,  # estimated states
+    #                  mav.true_state,  # commanded states
+    #                  delta,  # inputs to aircraft
+    #                  SIM.ts_simulation)
+
     if VIDEO is True:
         video.update(sim_time)
 
@@ -66,7 +72,3 @@ while sim_time < SIM.end_time:
 
 if VIDEO is True:
     video.close()
-
-
-
-
