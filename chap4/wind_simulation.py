@@ -35,31 +35,29 @@ class WindSimulation:
 
         # Dryden transfer functions (section 4.4 UAV book)
         self.u_w = transferFunction(
-            np.array([[sigma_u * np.sqrt((2 * Va) / (np.pi * Lu))]]),
+            np.array([[sigma_u * np.sqrt((2 * Va) / (Lu))]]),
             np.array([[1, Va / Lu]]),
             Ts,
         )
+
         self.v_w = transferFunction(
             np.array(
                 [
-                    [
-                        sigma_v
-                        * np.sqrt((3 * Va) / (np.pi * Lv))
-                        * np.array([1, Va / (np.sqrt(3) * Lv)])
-                    ]
+                    sigma_v
+                    * np.sqrt((3 * Va) / (Lv))
+                    * np.array([1, Va / (np.sqrt(3) * Lv)]),
                 ]
             ),
             np.array([[1, 2 * Va / Lv, (Va / Lv) ** 2]]),
             Ts,
         )
+
         self.w_w = transferFunction(
             np.array(
                 [
-                    [
-                        sigma_w
-                        * np.sqrt((3 * Va) / (np.pi * Lw))
-                        * np.array([1, Va / (np.sqrt(3) * Lw)])
-                    ]
+                    sigma_w
+                    * np.sqrt((3 * Va) / (Lw))
+                    * np.array([1, Va / (np.sqrt(3) * Lw)]),
                 ]
             ),
             np.array([[1, 2 * Va / Lw, (Va / Lw) ** 2]]),

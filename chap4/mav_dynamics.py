@@ -203,7 +203,7 @@ class MavDynamics:
             print("ur is zero!!")
             self._alpha = 0
         else:
-            self._alpha = np.arctan2(wr, vr)
+            self._alpha = np.arctan2(wr, ur)
         # compute sideslip angle
         if self._Va == 0:
             print("Va is zero!!")
@@ -233,7 +233,7 @@ class MavDynamics:
         ez = self._state.item(9)
         e0 = self._state.item(6)
 
-        # gravity force expressed in body frame
+        # gravity force expressed in body frame, try quaternion2rotation
         f_g = (
             MAV.mass
             * MAV.gravity
