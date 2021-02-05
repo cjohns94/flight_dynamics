@@ -222,17 +222,18 @@ class MavDynamics:
         delta_r = delta.rudder
         delta_t = delta.throttle
 
-        phi, theta, psi = Quaternion2Euler(self._state[6:10])
+        phi, theta, psi = Quaternion2Euler(self._state[6:10, 0])
         p = self._state.item(10)
         q = self._state.item(11)
         r = self._state.item(12)
 
         # compute gravitational forces, using quaternion
-        ex = self._state[7, 0]
-        ey = self._state[8, 0]
-        ez = self._state[9, 0]
-        e0 = self._state[6, 0]
+        ex = self._state.item(7)
+        ey = self._state.item(8)
+        ez = self._state.item(9)
+        e0 = self._state.item(6)
 
+        # gravity force expressed in body frame
         f_g = (
             MAV.mass
             * MAV.gravity
@@ -246,6 +247,7 @@ class MavDynamics:
         )
 
         # compute Lift (eq. 4.9) and Drag (eq 4.11) coefficients, sigma (eq 4.10)
+        # using nonlinear blended model for CL(alpha) and CD(alpha)
         sigma = (
             1
             + np.exp(-MAV.M * (self._alpha - MAV.alpha0))
@@ -354,6 +356,7 @@ class MavDynamics:
         self._forces[2] = fz
         forces_moments = np.array([[fx, fy, fz, Mx, My, Mz]]).T
         print("forces\n", forces_moments)
+        # return np.array([[0, 0, 0, 0.0, 0.0, 0.0]]).T
         return forces_moments
 
     def _motor_thrust_torque(self, Va, delta_t):
@@ -375,7 +378,7 @@ class MavDynamics:
         Omega_p = (-b + np.sqrt(b ** 2 - 4 * a * c)) / (2 * a)
 
         # calculate advance ratio J
-        J = (2 * np.pi * self._Va) / (Omega_p * MAV.D_prop)
+        J = (2 * np.pi * Va) / (Omega_p * MAV.D_prop)
 
         # calculate nondimensional coefficients
         C_T = MAV.C_T2 * J ** 2 + MAV.C_T1 * J + MAV.C_T0

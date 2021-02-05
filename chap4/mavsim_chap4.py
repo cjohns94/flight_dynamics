@@ -44,11 +44,10 @@ plot_time = sim_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     # -------set control surfaces-------------
-    delta.elevator = -0.0
+    delta.elevator = -0.2
     delta.aileron = 0.0
-    delta.rudder = 0.000
+    delta.rudder = 0.005
     delta.throttle = 0.5
-    # transpose to make it a column vector
 
     # -------physical system-------------
     current_wind = wind.update()  # get the new wind vector
