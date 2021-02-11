@@ -273,7 +273,7 @@ class MavDynamics:
 
         # compute propeller thrust and torque
         thrust_prop, torque_prop = self._motor_thrust_torque(self._Va, delta_t)
-        print("Thrust: ", thrust_prop)
+        # print("Thrust: ", thrust_prop)
 
         # compute longitudinal forces in body frame (4.24)
         sa = np.sin(self._alpha)
@@ -355,7 +355,7 @@ class MavDynamics:
         self._forces[1] = fy
         self._forces[2] = fz
         forces_moments = np.array([[fx, fy, fz, Mx, My, Mz]]).T
-        print("forces\n", forces_moments)
+        # print("forces\n", forces_moments)
         # return np.array([[0, 0, 0, 0.0, 0.0, 0.0]]).T
         return forces_moments
 

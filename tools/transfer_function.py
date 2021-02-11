@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 class transferFunction:
     def __init__(self, num, den, Ts):
-        print("Numerator: ", num)
-        print("Denom: ", den)
+        # print("Numerator: ", num)
+        # print("Denom: ", den)
         # expects num and den to be numpy arrays of shape (1,m) and (1,n)
         m = num.shape[1]
         n = den.shape[1]

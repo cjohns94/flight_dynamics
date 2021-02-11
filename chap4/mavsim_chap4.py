@@ -45,9 +45,9 @@ print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
     # -------set control surfaces-------------
     delta.elevator = -0.2
-    delta.aileron = 0.00
-    delta.rudder = 0.005
-    delta.throttle = 0.6
+    delta.aileron = 0.004
+    delta.rudder = 0.001
+    delta.throttle = 0.5
 
     # -------physical system-------------
     current_wind = wind.update()  # get the new wind vector
