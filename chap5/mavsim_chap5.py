@@ -47,10 +47,8 @@ delta = trim_input  # set input to constant constant trim input
 # compute the state space model linearized about trim
 compute_model(mav, trim_state, trim_input)
 
-# # this signal will be used to excite modes
-# input_signal = Signals(amplitude=.05,
-#                        duration=0.01,
-#                        start_time=2.0)
+# this signal will be used to excite modes
+input_signal = Signals(amplitude=0.05, duration=0.01, start_time=2.0)
 
 # initialize the simulation time
 sim_time = SIM.start_time
@@ -59,11 +57,17 @@ sim_time = SIM.start_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
 
+    print(sim_time)
     # -------physical system-------------
-    # current_wind = wind.update()  # get the new wind vector
-    current_wind = np.zeros((6, 1))
-    # this input excites the phugoid mode by adding an impulse at t=5.0
-    # delta[0][0] += input_signal.impulse(sim_time)
+    current_wind = wind.update()  # get the new wind vector
+    # current_wind = np.zeros((6, 1))
+
+    # this input excites the phugoid mode and short period mode
+    # delta.elevator += input_signal.impulse(sim_time)
+
+    # excite roll, sprial divergence, and dutch roll mode
+    delta.rudder += input_signal.doublet(sim_time)
+
     mav.update(delta, current_wind)  # propagate the MAV dynamics
 
     # -------update viewer-------------
