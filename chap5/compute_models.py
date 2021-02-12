@@ -18,13 +18,17 @@ from message_types.msg_delta import MsgDelta
 def compute_model(mav, trim_state, trim_input):
     A_lon, B_lon, A_lat, B_lat = compute_ss_model(mav, trim_state, trim_input)
 
-    print("\nEigenvalues of A_lon")
+    print("\n========= Eigenvalues of A_lon ============")
     print(np.linalg.eig(A_lon)[0])
+    print("\n Natural frequency of 1st pair")
+    print(np.sqrt(np.abs(np.real(np.linalg.eig(A_lon)[0][1]))))
+    print("\n Natural frequency of 2nd pair")
+    print(np.sqrt(np.abs(np.real(np.linalg.eig(A_lon)[0][3]))))
 
-    print("\nEigenvalues of A_lat")
+    print("\n========= Eigenvalues of A_lat ==========")
     print(np.linalg.eig(A_lat)[0])
 
-    breakpoint()
+    # breakpoint()
     input("Press Enter to continue")
     (
         Va_trim,
