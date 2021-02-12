@@ -48,7 +48,7 @@ delta = trim_input  # set input to constant constant trim input
 compute_model(mav, trim_state, trim_input)
 
 # this signal will be used to excite modes
-input_signal = Signals(amplitude=0.05, duration=0.01, start_time=2.0)
+input_signal = Signals(amplitude=0.1, duration=0.01, start_time=5.0)
 
 # initialize the simulation time
 sim_time = SIM.start_time
