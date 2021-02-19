@@ -60,18 +60,21 @@ class Autopilot:
     def update(self, cmd, state):
         # extract commands
         Va_cmd = cmd.airspeed_command
-        chi_cmd = cmd.course_command
+        chi_cmd = wrap(cmd.course_command, 0)
+
+        # print("CMD: ", np.degrees(chi_cmd))
+        # print("STE: ", np.degrees(state.chi))
 
         # LATERAL AUTOPILOT
         # ==================================================
-        phi_cmd = self.course_from_roll.update(chi_cmd, state.chi)
-        phi_dot = (
-            state.p
-            + np.sin(state.phi) * np.tan(state.theta) * state.q
-            + np.cos(state.phi) * np.tan(state.theta) * state.r
+        phi_cmd = self.saturate(
+            cmd.phi_feedforward + self.course_from_roll.update(chi_cmd, state.chi),
+            -np.radians(30),
+            np.radians(30),
         )
-        delta_a = self.roll_from_aileron.update(phi_cmd, state.phi, phi_dot)
-        delta_r = self.yaw_damper.update(
+        delta_a = self.roll_from_aileron.update(phi_cmd, state.phi, state.p)
+        delta_r = self.yaw_damper.update(state.r)
+        # delta_r = 0
 
         # =================================================
 
@@ -85,15 +88,13 @@ class Autopilot:
         Va_cmd_bar = Va_cmd - self.Va_trim
         Va_bar = state.Va - self.Va_trim
         delta_t_bar = self.airspeed_from_throttle.update(Va_cmd_bar, Va_bar)
-        delta_t = delta_t_bar + self.trim_inputs.throttle
+        delta_t = self.saturate(delta_t_bar + self.trim_inputs.throttle, 0, 1)
 
         # altitude hold loop
         theta_cmd = self.altitude_from_pitch.update(h_cmd, state.altitude)
 
         # pitch attitude hold loop
-        # theta_dot calculated directly from dynamics
-        theta_dot = np.cos(state.phi) * state.q - np.sin(state.phi) * state.r
-        delta_e = self.pitch_from_elevator.update(theta_cmd, state.theta, theta_dot)
+        delta_e = self.pitch_from_elevator.update(theta_cmd, state.theta, state.q)
 
         # ===================================================
 
@@ -101,7 +102,7 @@ class Autopilot:
         delta = MsgDelta(
             elevator=delta_e,
             aileron=delta_a,
-            rudder=self.trim_inputs.rudder,
+            rudder=delta_r,
             throttle=delta_t,
         )
 

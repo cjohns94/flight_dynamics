@@ -45,7 +45,7 @@ from message_types.msg_autopilot import MsgAutopilot
 commands = MsgAutopilot()
 Va_command = Signals(dc_offset=25.0, amplitude=3.0, start_time=2.0, frequency=0.01)
 altitude_command = Signals(
-    dc_offset=100.0, amplitude=10.0, start_time=10.0, frequency=0.02
+    dc_offset=100.0, amplitude=10.0, start_time=2.0, frequency=0.02
 )
 course_command = Signals(
     dc_offset=np.radians(180), amplitude=np.radians(45), start_time=5.0, frequency=0.015
@@ -58,7 +58,7 @@ sim_time = SIM.start_time
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
 
-    print(sim_time)
+    # print(sim_time)
 
     # -------autopilot commands-------------
     commands.airspeed_command = Va_command.square(sim_time)
