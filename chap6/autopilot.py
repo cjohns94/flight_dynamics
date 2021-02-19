@@ -58,26 +58,28 @@ class Autopilot:
         self.Va_trim = Va_trim
 
     def update(self, cmd, state):
-        """
-        cmd: MsgAutopilot(
-        """
-
         # extract commands
         Va_cmd = cmd.airspeed_command
-        Chi_cmd = cmd.course_command
+        chi_cmd = cmd.course_command
 
-        # lateral autopilot
-        chi_c = 0
-        phi_c = 0
-        delta_a = 0
-        delta_r = 0
+        # LATERAL AUTOPILOT
+        # ==================================================
+        phi_cmd = self.course_from_roll.update(chi_cmd, state.chi)
+        phi_dot = (
+            state.p
+            + np.sin(state.phi) * np.tan(state.theta) * state.q
+            + np.cos(state.phi) * np.tan(state.theta) * state.r
+        )
+        delta_a = self.roll_from_aileron.update(phi_cmd, state.phi, phi_dot)
+        delta_r = self.yaw_damper.update(
 
-        # longitudinal autopilot
+        # =================================================
+
+        # LONGITUDINAL AUTOPILOT
+        # ====================================================
         # saturate the altitude command
         h_cmd = cmd.altitude_command
         h_cmd = self.saturate(h_cmd, h_cmd - AP.altitude_zone, h_cmd + AP.altitude_zone)
-        theta_c = 0
-        delta_e = 0
 
         # airspeed using throttle loop
         Va_cmd_bar = Va_cmd - self.Va_trim
@@ -93,23 +95,22 @@ class Autopilot:
         theta_dot = np.cos(state.phi) * state.q - np.sin(state.phi) * state.r
         delta_e = self.pitch_from_elevator.update(theta_cmd, state.theta, theta_dot)
 
-        # construct output and commanded states
-        # delta = MsgDelta(
-        #     elevator=delta_e, aileron=delta_a, rudder=delta_r, throttle=delta_t
-        # )
+        # ===================================================
 
+        # construct output and commanded states
         delta = MsgDelta(
             elevator=delta_e,
-            aileron=self.trim_inputs.aileron,
+            aileron=delta_a,
             rudder=self.trim_inputs.rudder,
             throttle=delta_t,
         )
 
         self.commanded_state.altitude = cmd.altitude_command
         self.commanded_state.Va = cmd.airspeed_command
-        self.commanded_state.phi = phi_c
-        self.commanded_state.theta = theta_c
+        self.commanded_state.phi = phi_cmd
+        self.commanded_state.theta = theta_cmd
         self.commanded_state.chi = cmd.course_command
+
         return delta, self.commanded_state
 
     def saturate(self, input, low_limit, up_limit):
