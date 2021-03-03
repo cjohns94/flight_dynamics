@@ -5,7 +5,8 @@ mavsim_python
         2/18/2020 - RWB
 """
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 import numpy as np
 import parameters.simulation_parameters as SIM
 
@@ -17,6 +18,7 @@ from chap7.mav_dynamics import MavDynamics
 from chap7.sensor_viewer import SensorViewer
 from tools.signals import Signals
 
+
 # initialize the visualization
 VIDEO = False  # True==write video, False==don't write video
 mav_view = MavViewer()  # initialize the mav viewer
@@ -24,9 +26,12 @@ data_view = DataViewer()  # initialize view of data plots
 sensor_view = SensorViewer()  # initialize view of sensor data plots
 if VIDEO is True:
     from chap2.video_writer import VideoWriter
-    video = VideoWriter(video_name="chap7_video.avi",
-                        bounding_box=(0, 0, 1000, 1000),
-                        output_rate=SIM.ts_video)
+
+    video = VideoWriter(
+        video_name="chap7_video.avi",
+        bounding_box=(0, 0, 1000, 1000),
+        output_rate=SIM.ts_video,
+    )
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
@@ -35,19 +40,15 @@ autopilot = Autopilot(SIM.ts_simulation)
 
 # autopilot commands
 from message_types.msg_autopilot import MsgAutopilot
+
 commands = MsgAutopilot()
-Va_command = Signals(dc_offset=25.0,
-                     amplitude=3.0,
-                     start_time=2.0,
-                     frequency=0.01)
-altitude_command = Signals(dc_offset=100.0,
-                           amplitude=10.0,
-                           start_time=0.0,
-                           frequency=0.02)
-course_command = Signals(dc_offset=np.radians(180),
-                         amplitude=np.radians(45),
-                         start_time=5.0,
-                         frequency=0.015)
+Va_command = Signals(dc_offset=25.0, amplitude=3.0, start_time=2.0, frequency=0.01)
+altitude_command = Signals(
+    dc_offset=100.0, amplitude=10.0, start_time=0.0, frequency=0.02
+)
+course_command = Signals(
+    dc_offset=np.radians(180), amplitude=np.radians(45), start_time=5.0, frequency=0.015
+)
 
 # initialize the simulation time
 sim_time = SIM.start_time
@@ -72,13 +73,14 @@ while sim_time < SIM.end_time:
 
     # -------update viewer-------------
     mav_view.update(mav.true_state)  # plot body of MAV
-    data_view.update(mav.true_state,  # true states
-                     estimated_state,  # estimated states
-                     commanded_state,  # commanded states
-                     delta,  # input to aircraft
-                     SIM.ts_simulation)
-    sensor_view.update(mav.sensors(),  # sensor values
-                       SIM.ts_simulation)
+    data_view.update(
+        mav.true_state,  # true states
+        estimated_state,  # estimated states
+        commanded_state,  # commanded states
+        delta,  # input to aircraft
+        SIM.ts_simulation,
+    )
+    sensor_view.update(mav.sensors(), SIM.ts_simulation)  # sensor values
     if VIDEO is True:
         video.update(sim_time)
 
