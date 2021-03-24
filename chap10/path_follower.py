@@ -28,6 +28,13 @@ class PathFollower:
         self.autopilot_commands.airspeed_command = path.airspeed
 
         chi_q = np.arccos(path.line_direction.item(0))
+
+        # smallest turn logic
+        while chi_q - state.chi < -np.pi:
+            chi_q += 2 * np.pi
+        while chi_q - state.chi > np.pi:
+            chi_q += -2 * np.pi
+
         R = np.array(
             [
                 [np.cos(chi_q), np.sin(chi_q), 0],
@@ -65,25 +72,44 @@ class PathFollower:
         # feedforward roll angle for straight line is zero
         self.autopilot_commands.phi_feedforward = 0
 
-    # def _follow_orbit(self, path, state):
-    #     if path.orbit_direction == 'CW':
-    #         direction = 1.0
-    #     else:
-    #         direction = -1.0
-    #     # airspeed command
-    #     self.autopilot_commands.airspeed_command =
-    #     # distance from orbit center
-    #     d =
-    #     # compute wrapped version of angular position on orbit
-    #     varphi =
-    #     # compute normalized orbit error
-    #     orbit_error =
-    #     # course command
-    #     self.autopilot_commands.course_command =
-    #     # altitude command
-    #     self.autopilot_commands.altitude_command =
-    #     # roll feedforward command
-    #     if orbit_error < 10:
-    #         self.autopilot_commands.phi_feedforward =
-    #     else:
-    #         self.autopilot_commands.phi_feedforward =
+    def _follow_orbit(self, path, state):
+        if path.orbit_direction == "CW":
+            direction = 1.0
+        else:
+            direction = -1.0
+        # airspeed command
+        self.autopilot_commands.airspeed_command = path.airspeed
+        # distance from orbit center
+        c = path.orbit_center
+        p = np.array([[state.north, state.east, -state.altitude]]).T
+
+        d = np.sqrt((p.item(0) - c.item(0)) ** 2 + (p.item(1) - c.item(1)) ** 2)
+        # compute wrapped version of angular position on orbit
+        varphi = np.arctan2(p.item(1) - c.item(1), p.item(0) - c.item(0))
+
+        # smallest turn logic
+        while varphi - state.chi < -np.pi:
+            varphi += 2 * np.pi
+
+        while varphi - state.chi > np.pi:
+            varphi += -2 * np.pi
+
+        # compute normalized orbit error
+        rho = path.orbit_radius
+        orbit_error = d - rho
+        # course command
+        chi_0 = varphi + direction * np.pi / 2
+
+        self.autopilot_commands.course_command = chi_0 + direction * np.arctan(
+            self.k_orbit * (orbit_error / rho)
+        )
+
+        # altitude command
+        self.autopilot_commands.altitude_command = -c.item(2)
+        # roll feedforward command
+        if orbit_error < 10:
+            self.autopilot_commands.phi_feedforward = direction * np.arctan2(
+                state.Va ** 2, self.gravity * rho
+            )
+        else:
+            self.autopilot_commands.phi_feedforward = 0

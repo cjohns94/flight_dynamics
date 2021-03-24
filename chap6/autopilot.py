@@ -60,7 +60,7 @@ class Autopilot:
     def update(self, cmd, state):
         # extract commands
         Va_cmd = cmd.airspeed_command
-        chi_cmd = wrap(cmd.course_command, 0)
+        chi_cmd = wrap(cmd.course_command, state.chi)
 
         # print("CMD: ", np.degrees(chi_cmd))
         # print("STE: ", np.degrees(state.chi))
