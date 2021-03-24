@@ -6,7 +6,8 @@ mavsim_python
         2/27/2020 - RWB
 """
 import sys
-sys.path.append('..')
+
+sys.path.append("..")
 import numpy as np
 import parameters.simulation_parameters as SIM
 
@@ -24,9 +25,12 @@ path_view = PathViewer()  # initialize the viewer
 data_view = DataViewer()  # initialize view of data plots
 if VIDEO is True:
     from chap2.video_writer import VideoWriter
-    video = VideoWriter(video_name="chap10_video.avi",
-                        bounding_box=(0, 0, 1000, 1000),
-                        output_rate=SIM.ts_video)
+
+    video = VideoWriter(
+        video_name="chap10_video.avi",
+        bounding_box=(0, 0, 1000, 1000),
+        output_rate=SIM.ts_video,
+    )
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
@@ -37,17 +41,20 @@ path_follower = PathFollower()
 
 # path definition
 from message_types.msg_path import MsgPath
+
 path = MsgPath()
-#path.type = 'line'
-path.type = 'orbit'
-if path.type == 'line':
+path.type = "line"
+# path.type = 'orbit'
+if path.type == "line":
     path.line_origin = np.array([[0.0, 0.0, -100.0]]).T
     path.line_direction = np.array([[0.5, 1.0, 0.0]]).T
     path.line_direction = path.line_direction / np.linalg.norm(path.line_direction)
-elif path.type == 'orbit':
+elif path.type == "orbit":
     path.orbit_center = np.array([[0.0, 0.0, -100.0]]).T  # center of the orbit
     path.orbit_radius = 300.0  # radius of the orbit
-    path.orbit_direction = 'CW'  # orbit direction: 'CW'==clockwise, 'CCW'==counter clockwise
+    path.orbit_direction = (
+        "CW"  # orbit direction: 'CW'==clockwise, 'CCW'==counter clockwise
+    )
 
 # initialize the simulation time
 sim_time = SIM.start_time
@@ -62,7 +69,7 @@ while sim_time < SIM.end_time:
 
     # -------path follower-------------
     autopilot_commands = path_follower.update(path, estimated_state)
-    #autopilot_commands = path_follower.update(path, mav.true_state)  # for debugging
+    # autopilot_commands = path_follower.update(path, mav.true_state)  # for debugging
 
     # -------autopilot-------------
     delta, commanded_state = autopilot.update(autopilot_commands, estimated_state)
@@ -74,11 +81,13 @@ while sim_time < SIM.end_time:
     # -------update viewer-------------
     if plot_timer > SIM.ts_plotting:
         path_view.update(mav.true_state, path)  # plot path and MAV
-        data_view.update(mav.true_state,  # true states
-                         estimated_state,  # estimated states
-                         commanded_state,  # commanded states
-                         delta,  # input to aircraft
-                         SIM.ts_simulation)
+        data_view.update(
+            mav.true_state,  # true states
+            estimated_state,  # estimated states
+            commanded_state,  # commanded states
+            delta,  # input to aircraft
+            SIM.ts_simulation,
+        )
         plot_timer = 0
     plot_timer += SIM.ts_simulation
 
@@ -90,7 +99,3 @@ while sim_time < SIM.end_time:
 
 if VIDEO is True:
     video.close()
-
-
-
-
