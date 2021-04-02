@@ -7,7 +7,7 @@ mavsim_python: drawing tools
 
 import numpy as np
 import pyqtgraph.opengl as gl
-from chap11.dubins_parameters import DubinsParameters
+# from chap11.dubins_parameters import DubinsParameters
 
 
 class DrawWaypoints:

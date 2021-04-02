@@ -41,8 +41,8 @@ path_manager = PathManager()
 # waypoint definition
 from message_types.msg_waypoints import MsgWaypoints
 waypoints = MsgWaypoints()
-waypoints.type = 'straight_line'
-#waypoints.type = 'fillet'
+# waypoints.type = 'straight_line'
+waypoints.type = 'fillet'
 #waypoints.type = 'dubins'
 Va = PLAN.Va0
 waypoints.add(np.array([[0, 0, -100]]).T, Va, np.radians(0), np.inf, 0, 0)
@@ -58,9 +58,12 @@ plot_timer = 0
 # main simulation loop
 print("Press Command-Q to exit...")
 while sim_time < SIM.end_time:
+
+    print(sim_time)
     # -------observer-------------
     measurements = mav.sensors()  # get sensor measurements
-    estimated_state = observer.update(measurements)  # estimate states from measurements
+    # estimated_state = observer.update(measurements)  # estimate states from measurements
+    estimated_state = mav.true_state # use true states in control instead of estimated
 
     # -------path manager-------------
     path = path_manager.update(waypoints, PLAN.R_min, estimated_state)
